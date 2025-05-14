@@ -1,18 +1,23 @@
+import subprocess
+import os
+import importlib.util
 
-import subprocess,os
-import imp
-def TTSnorm(text, punc = False, unknown = True, lower = True, rule = False ):
-    A=imp.find_module('vinorm')[1]
 
-    #print(A)
-    I=A+"/input.txt"
+def TTSnorm(text, punc=False, unknown=True, lower=True, rule=False):
+    spec = importlib.util.find_spec('vinorm')
+    if spec is None:
+        raise ImportError("Module 'vinorm' is not found")
+    A = os.path.dirname(spec.origin)
+
+    # print(A)
+    I = A+"/input.txt"
     with open(I, mode="w+", encoding="utf-8") as fw:
         fw.write(text)
 
     myenv = os.environ.copy()
     myenv['LD_LIBRARY_PATH'] = A+'/lib'
 
-    E=A+"/main"
+    E = A+"/main"
     Command = [E]
     if punc:
         Command.append("-punc")
@@ -23,16 +28,15 @@ def TTSnorm(text, punc = False, unknown = True, lower = True, rule = False ):
     if rule:
         Command.append("-rule")
     subprocess.check_call(Command, env=myenv, cwd=A)
-    
-    O=A+"/output.txt"
-    with open(O, mode="r", encoding="utf-8") as fr:
-        text=fr.read()
-    TEXT=""
-    S=text.split("#line#")
-    for s in S:
-        if s=="":
-            continue
-        TEXT+=s+". "
 
+    O = A+"/output.txt"
+    with open(O, mode="r", encoding="utf-8") as fr:
+        text = fr.read()
+    TEXT = ""
+    S = text.split("#line#")
+    for s in S:
+        if s == "":
+            continue
+        TEXT += s+". "
 
     return TEXT
